@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User, AbstractUser
 from .choices import QUESTION_CHOICES
+from .utils.utility import generate_random_string
 
 class User(AbstractUser, models.Model):
     email = models.EmailField(unique=True)
@@ -33,6 +34,17 @@ class Form(BaseModel):
     background_color = models.CharField(max_length=100, default='#272124')
     collect_email = models.BooleanField(default=False)
     questions = models.ManyToManyField(Questions, related_name='questions')
+
+    def create_blank_form(user):
+        form_token = generate_random_string()
+        choices = Choices.objects.create(choice = 'option 1')
+        question = Questions.objects.create(question_type="multiple choice", question="untitled question")
+        question.choices.add(choices)
+
+        form = Form(code = form_token, title = 'Untitled Form', creator=user)
+        form.save()
+        form.questions.add(question)
+        return form
 
 class Answers(models.Model):
     answer = models.CharField(max_length=100)
