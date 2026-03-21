@@ -4,27 +4,27 @@ from .models import (
 )
 
 
-class Form(serializers.ModelField):
+class FormSerializer(serializers.ModelSerializer):
     class Meta:
         model = Form
         exclude = ['created_at', 'updated_at']
         
-class Choices(serializers.ModelField):
+class ChoicesSerializer(serializers.ModelSerializer):
     class Meta:
         model = Choices
         exclude = ['created_at', 'updated_at']
         
-class Questions(serializers.ModelField):
+class QuestionsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Questions
         exclude = ['created_at', 'updated_at']
         
-class Answers(serializers.ModelField):
+class AnswersSerializer(serializers.ModelSerializer):
     class Meta:
         model = Answers
         exclude = ['created_at', 'updated_at']
         
-class Responses(serializers.ModelField):
+class ResponsesSerializer(serializers.ModelSerializer):
     class Meta:
         model = Responses
         exclude = ['created_at', 'updated_at']
