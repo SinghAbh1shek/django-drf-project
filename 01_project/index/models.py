@@ -5,6 +5,7 @@ from .utils.utility import generate_random_string
 
 class User(AbstractUser, models.Model):
     email = models.EmailField(unique=True)
+    REQUIRED_FIELDS = []
 
 class BaseModel(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
@@ -28,13 +29,14 @@ class Questions(BaseModel):
 
 class Form(BaseModel):
     code = models.CharField(max_length=100, unique=True)
-    creater = models.ForeignKey(User, on_delete=models.CASCADE)
+    creator = models.ForeignKey(User, on_delete=models.CASCADE)
     title = models.CharField(max_length=100)
     description = models.CharField(max_length=100)
     background_color = models.CharField(max_length=100, default='#272124')
     collect_email = models.BooleanField(default=False)
     questions = models.ManyToManyField(Questions, related_name='questions')
 
+    @staticmethod
     def create_blank_form(user):
         form_token = generate_random_string()
         choices = Choices.objects.create(choice = 'option 1')
