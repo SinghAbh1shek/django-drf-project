@@ -29,6 +29,7 @@ class ChoicesSerializer(serializers.ModelSerializer):
         exclude = ['created_at', 'updated_at']
         
 class QuestionsSerializer(serializers.ModelSerializer):
+    choices = ChoicesSerializer(read_only = True, many=True)
     class Meta:
         model = Questions
         exclude = ['created_at', 'updated_at']
