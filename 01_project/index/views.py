@@ -21,7 +21,6 @@ class FormAPI(APIView):
             user = User.objects.first()
             form = Form().create_blank_form(user)
             serializer = FormSerializer(form)
-            print(serializer)
             return Response({
                 'status': True,
                 'message': 'form created successfully',
@@ -29,7 +28,6 @@ class FormAPI(APIView):
             })
             
         except Exception as e:
-            print(e)
             return Response({
                 'status': False,
                 'message': 'something went wrongs',

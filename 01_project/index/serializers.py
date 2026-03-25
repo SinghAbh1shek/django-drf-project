@@ -8,6 +8,20 @@ class FormSerializer(serializers.ModelSerializer):
     class Meta:
         model = Form
         exclude = ['created_at', 'updated_at']
+
+    def to_representation(self, instance):
+        questions = instance.questions.all()
+        question_serializer = QuestionsSerializer(questions, many=True)
+        payload = {
+            'form': instance.id,
+            'code': instance.code,
+            'title': instance.title,
+            'description': instance.description,
+            'creator': instance.creator.username,
+            'background_color': instance.background_color,
+            'questions': question_serializer.data
+        }
+        return payload
         
 class ChoicesSerializer(serializers.ModelSerializer):
     class Meta:
