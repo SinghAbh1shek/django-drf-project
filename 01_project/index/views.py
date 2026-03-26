@@ -4,7 +4,7 @@ from .serializers import (
     FormSerializer, ChoicesSerializer, AnswersSerializer, QuestionsSerializer, ResponsesSerializer
 )
 from django.contrib.auth import get_user_model
-from .models import Form
+from .models import Form, Questions
 
 User = get_user_model()
 
@@ -69,3 +69,43 @@ class FormAPI(APIView):
                 'message': 'something went wrongs',
                 'data': {}
             })
+        
+class QuestionAPI(APIView):
+
+    def post(self, request):
+        try:
+            data = request.data
+            data['question'] = 'Untitled Question'
+            data['question_type'] = 'multiple choice'
+
+            if not data.get('form_id'):
+                return Response({
+                        'status': False,
+                        'message': 'Form ID is required',
+                        'data': {}
+                    })
+
+            serializer = QuestionsSerializer(data=data)
+            if serializer.is_valid():
+                serializer.save()
+                form = Form.objects.get(id = data['form'])
+                form.questions.add(Questions.objects.get(id = serializer.data['id']))
+
+                return Response({
+                    'status': True,
+                    'message': 'question created',
+                    'data': serializer.data
+                })
+            return Response({
+                'status': False,
+                'message': 'invalid form',
+                'data': {}
+            })
+        
+        except Exception as e:
+            return Response({
+                'status': False,
+                'message': 'something went wrongs',
+                'data': {}
+            })
+            
