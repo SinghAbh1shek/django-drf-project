@@ -7,6 +7,9 @@ class User(AbstractUser, models.Model):
     email = models.EmailField(unique=True)
     REQUIRED_FIELDS = []
 
+    def __str__(self):
+        return self.username
+
 class BaseModel(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -21,11 +24,17 @@ class Choices(BaseModel):
         db_table = 'choices'
         ordering = ['choice']
 
+    def __str__(self):
+        return self.choice
+
 class Questions(BaseModel):
     question = models.CharField(max_length=100)
     question_type = models.CharField(choices=QUESTION_CHOICES, max_length=100)
     required = models.BooleanField(default=False)
     choices = models.ManyToManyField(Choices, related_name='question_choices', blank=True)
+
+    def __str__(self):
+        return self.question
 
 class Form(BaseModel):
     code = models.CharField(max_length=100, unique=True)
@@ -47,10 +56,16 @@ class Form(BaseModel):
         form.save()
         form.questions.add(question)
         return form
+    
+    def __str__(self):
+        return self.title
 
 class Answers(models.Model):
     answer = models.CharField(max_length=100)
     answer_to = models.ForeignKey(Questions, on_delete=models.CASCADE, related_name='answer_to')
+
+    def __str__(self):
+        return self.answer
 
 class Responses(BaseModel):
     response_code = models.CharField(max_length=100, unique=True)
@@ -58,3 +73,6 @@ class Responses(BaseModel):
     responder_ip = models.CharField(max_length=100)
     responder_email = models.EmailField(null=True, blank=True)
     response = models.ManyToManyField(Answers, related_name='answers')
+
+    def __str__(self):
+        return self.response_code
