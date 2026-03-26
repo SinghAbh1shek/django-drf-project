@@ -108,4 +108,43 @@ class QuestionAPI(APIView):
                 'message': 'something went wrongs',
                 'data': {}
             })
+    
+    def patch(self, request):
+        try:
+            data = request.data
+            if not data.get('question_id'):
+                return Response({
+                    'status': False,
+                    'message': 'question_id is required',
+                    'data': {}
+                })
+            question_obj = Questions.objects.filter(id = data.get('question_id'))
+            if not question_obj.exists():
+                return Response({
+                    'status': False,
+                    'message': 'invalid question_id',
+                    'data': {}
+                })
+            serializer = QuestionsSerializer(question_obj[0], data=data, partial=True)
+            if serializer.is_valid():
+                serializer.save()
+                return Response({
+                    'status': True,
+                    'message': 'question updated',
+                    'data': serializer.data
+                })
+            return Response({
+                'status': False,
+                'message': 'something went wrong',
+                'err': serializer.errors
+            })
+            
+                
+
+        except Exception as e:
+            return Response({
+                'status': False,
+                'message': 'something went wrongs',
+                'data': {}
+            })
             
