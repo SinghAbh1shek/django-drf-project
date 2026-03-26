@@ -33,3 +33,39 @@ class FormAPI(APIView):
                 'message': 'something went wrongs',
                 'data': {}
             })
+        
+    def patch(self, request):
+        try:
+            data = request.data
+            if not data.get('form_id'):
+                return Response({
+                    'status': False,
+                    'message': 'Form ID is required',
+                    'data': {}
+                })
+            form_obj = Form.objects.filter(id = data.get('form_id'))
+            if form_obj.exists():
+                serializer = FormSerializer(form_obj[0], data=data, partial=True)
+                if serializer.is_valid():
+                    serializer.save()
+                    return Response({
+                        'status': True,
+                        'message': 'form updated successfully',
+                        'data': serializer.data
+                    })
+                return Response({
+                    'status': False,
+                    'message': 'something went wrong',
+                    'err': serializer.errors
+                })
+            return Response({
+                'status': False,
+                'message': 'invalid form id',
+                'data': {}
+            })
+        except Exception as e:
+            return Response({
+                'status': False,
+                'message': 'something went wrongs',
+                'data': {}
+            })
