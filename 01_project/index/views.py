@@ -4,7 +4,7 @@ from .serializers import (
     FormSerializer, ChoicesSerializer, AnswersSerializer, QuestionsSerializer, ResponsesSerializer
 )
 from django.contrib.auth import get_user_model
-from .models import Form, Questions
+from .models import Form, Questions, Choices
 
 User = get_user_model()
 
@@ -88,7 +88,7 @@ class QuestionAPI(APIView):
             serializer = QuestionsSerializer(data=data)
             if serializer.is_valid():
                 serializer.save()
-                form = Form.objects.get(id = data['form'])
+                form = Form.objects.get(id = data['form_id'])
                 form.questions.add(Questions.objects.get(id = serializer.data['id']))
 
                 return Response({
@@ -148,3 +148,35 @@ class QuestionAPI(APIView):
                 'data': {}
             })
             
+class ChoiceAPI(APIView):
+    def post(self, request):
+        try:
+            data = request.data
+            if not data.get('form_id') or not data.get('question_id'):
+                return Response({
+                    'status': False,
+                    'message': 'form_id and question_id both are required',
+                    'data': {}
+                })
+            serializer = ChoicesSerializer(data=data)
+            if serializer.is_valid():
+                serializer.save()
+                form = Form.objects.get(id=data['form_id'])
+                form.questions.get(id=data['question_id']).choices.add(Choices.objects.get(id=serializer.data['id']))
+                return Response({
+                    'status': True,
+                    'message': 'a choice created',
+                    'data': serializer.data
+                })
+            return Response({
+                'status': False,
+                'message': 'invalid form_id or question_id',
+                'err': serializer.errors
+            })
+
+        except Exception as e:
+            return Response({
+                'status': False,
+                'message': 'something went wrongs',
+                'err': {}
+            })
