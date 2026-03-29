@@ -158,6 +158,7 @@ class ChoiceAPI(APIView):
                     'message': 'form_id and question_id both are required',
                     'data': {}
                 })
+            data['choice'] = 'Option'
             serializer = ChoicesSerializer(data=data)
             if serializer.is_valid():
                 serializer.save()
@@ -171,6 +172,44 @@ class ChoiceAPI(APIView):
             return Response({
                 'status': False,
                 'message': 'invalid form_id or question_id',
+                'err': serializer.errors
+            })
+
+        except Exception as e:
+            return Response({
+                'status': False,
+                'message': 'something went wrongs',
+                'err': {}
+            })
+        
+    def patch(self, request):
+        try:
+            data = request.data
+            if not data.get('choice_id'):
+                return Response({
+                    'status': False,
+                    'message': 'choice_id is required',
+                    'data': {}
+                })
+            choice_obj = Choices.objects.filter(id=data.get('choice_id'))
+            if not choice_obj.exists():
+                return Response({
+                    'status': False,
+                    'message': 'invalid choice_id',
+                    'data': {}
+                })
+            
+            serializer = ChoicesSerializer(choice_obj[0], data=data, partial=True)
+            if serializer.is_valid():
+                serializer.save()
+                return Response({
+                    'status': True,
+                    'message': 'choice updated',
+                    'data': serializer.data
+                })
+            return Response({
+                'status': False,
+                'message': 'invalid input',
                 'err': serializer.errors
             })
 
