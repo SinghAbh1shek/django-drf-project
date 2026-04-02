@@ -1,17 +1,18 @@
 from django.db import models
 from django.contrib.auth.models import User
 from .choices import GENDER_CHOICES
+from utils.utility import BaseModel
 
-class AnimalCategory(models.Model):
+class AnimalCategory(BaseModel):
     category = models.CharField(max_length=100)
 
-class AnimalBreed(models.Model):
+class AnimalBreed(BaseModel):
     breed = models.CharField(max_length=100)
 
-class AnimalColor(models.Model):
+class AnimalColor(BaseModel):
     color = models.CharField(max_length=100)
 
-class Animal(models.Model):
+class Animal(BaseModel):
     owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name='animal')
     category = models.ForeignKey(AnimalCategory, on_delete=models.CASCADE, related_name='animal_category')
     name = models.CharField(max_length=100)
@@ -23,10 +24,10 @@ class Animal(models.Model):
     breed = models.ManyToManyField(AnimalBreed, null=True)
     color = models.ManyToManyField(AnimalColor, null=True)
 
-class AnimalLocation(models.Model):
+class AnimalLocation(BaseModel):
     animal = models.ForeignKey(Animal, on_delete=models.CASCADE, related_query_name='animal_location')
     location = models.CharField(max_length=100)
 
-class AnimalImages(models.Model):
+class AnimalImages(BaseModel):
     animal = models.ForeignKey(Animal, on_delete=models.CASCADE, related_name='animal_images')
     image = models.ImageField(upload_to='animals')
