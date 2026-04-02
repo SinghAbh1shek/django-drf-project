@@ -6,11 +6,20 @@ from utils.utility import BaseModel
 class AnimalCategory(BaseModel):
     category = models.CharField(max_length=100)
 
+    def __str__(self):
+        return self.category
+
 class AnimalBreed(BaseModel):
     breed = models.CharField(max_length=100)
 
+    def __str__(self):
+        return self.breed
+
 class AnimalColor(BaseModel):
     color = models.CharField(max_length=100)
+
+    def __str__(self):
+        return self.color
 
 class Animal(BaseModel):
     owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name='animal')
@@ -24,10 +33,22 @@ class Animal(BaseModel):
     breed = models.ManyToManyField(AnimalBreed, null=True)
     color = models.ManyToManyField(AnimalColor, null=True)
 
+    class Meta:
+        ordering = ['name']
+
+    def __str__(self):
+        return self.name
+
 class AnimalLocation(BaseModel):
     animal = models.ForeignKey(Animal, on_delete=models.CASCADE, related_query_name='animal_location')
     location = models.CharField(max_length=100)
 
+    def __str__(self):
+        return f'{self.location} - {self.animal.name}'
+
 class AnimalImages(BaseModel):
     animal = models.ForeignKey(Animal, on_delete=models.CASCADE, related_name='animal_images')
     image = models.ImageField(upload_to='animals')
+
+    def __str__(self):
+        return f'image - {self.animal.name}'
