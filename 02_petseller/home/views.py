@@ -2,10 +2,22 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from .models import (Animal)
 from .serializers import (AnimalSerializer)
+from django.db.models import Q
 
 class AnimalAPI(APIView):
     def get(self, request):
         queryset = Animal.objects.all()
+
+        if request.GET.get('search'):
+            search = request.GET.get('search')
+            queryset = queryset.filter(
+                Q(name__icontains = search) |
+                Q(description__icontains = search) |
+                Q(gender__iexact = search) |
+                Q(breed__breed__icontains = search) |
+                Q(color__color__icontains = search)
+            )
+
         serializer = AnimalSerializer(queryset, many=True)
 
         return Response({
