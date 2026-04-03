@@ -57,3 +57,14 @@ class RegisterSerializer(serializers.Serializer):
             if user.exists():
                 raise serializers.ValidationError('email already exist')
         return data
+
+class LoginSerializer(serializers.Serializer):
+    username = serializers.CharField()
+    password = serializers.CharField()
+
+    def validate(self, data):
+        if 'username' in data:
+            user = User.objects.filter(username=data['username'])
+            if not user.exists():
+                raise serializers.ValidationError('username does not exist')
+        return data

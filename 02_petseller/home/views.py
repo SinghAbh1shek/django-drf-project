@@ -1,9 +1,11 @@
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from .models import (Animal)
-from .serializers import (AnimalSerializer, RegisterSerializer)
+from .serializers import (AnimalSerializer, RegisterSerializer, LoginSerializer)
 from django.db.models import Q
 from django.contrib.auth.models import User
+from django.contrib.auth import authenticate
+from rest_framework.authtoken.models import Token
 
 class AnimalAPI(APIView):
     def get(self, request):
@@ -69,7 +71,41 @@ class RegisterAPI(APIView):
             })
 
         except Exception as e:
-            print(e)
+            return Response({
+                'status': False,
+                'message': 'something went wrong',
+                'data': {}
+            })
+
+class LoginAPI(APIView):
+    def post(self, request):
+        try:
+            data = request.data
+            serializer = LoginSerializer(data = data)
+            if serializer.is_valid():
+                user = authenticate(username = serializer.data['username'], password = serializer.data['password'])
+                if user:
+                    token, _ = Token.objects.get_or_create(user=user)
+                    return Response({
+                        'status': True,
+                        'message': 'auth token created',
+                        'data': {
+                            'token': str(token)
+                        }
+                    })
+
+                return Response({
+                    'status': False,
+                    'message': 'invalid credential',
+                    'data': {}
+                })
+            return Response({
+                'status': False,
+                'message': 'keys error',
+                'data': serializer.errors
+            })
+
+        except Exception as e:
             return Response({
                 'status': False,
                 'message': 'something went wrong',
