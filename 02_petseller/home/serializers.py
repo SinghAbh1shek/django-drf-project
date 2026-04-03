@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from .models import (AnimalCategory, AnimalBreed, AnimalColor, Animal, AnimalLocation, AnimalImages)
+from django.contrib.auth.models import User
 
 class AnimalCategorySerializer(serializers.ModelSerializer):
     class Meta:
@@ -39,4 +40,20 @@ class AnimalSerializer(serializers.ModelSerializer):
         model = Animal
         exclude = ['updated_at']
         
-        
+
+class RegisterSerializer(serializers.Serializer):
+    username = serializers.CharField()
+    email = serializers.EmailField()
+    password = serializers.CharField()
+
+    def validate(self, data):
+        if 'username' in data:
+            user = User.objects.filter(username = data['username'])
+            if user.exists():
+                raise serializers.ValidationError('username is already taken')
+
+        if 'email' in data:
+            user = User.objects.filter(email = data['email'])
+            if user.exists():
+                raise serializers.ValidationError('email already exist')
+        return data
