@@ -13,3 +13,21 @@ class AnimalAPI(APIView):
             'message': 'record fetched',
             'data': serializer.data
         })
+
+class AnimalDetailsView(APIView):
+    def get(self, request, pk):
+        try:
+            queryset = Animal.objects.get(pk=pk)
+            queryset.incrementViews()
+            serializer = AnimalSerializer(queryset)
+            return Response({
+                'status': True,
+                'message': 'record fetched',
+                'data': serializer.data
+            })
+        except Exception as e:
+            return Response({
+                'status': False,
+                'message': 'something went wrong',
+                'data': {}
+            })

@@ -33,6 +33,14 @@ class Animal(BaseModel):
     breed = models.ManyToManyField(AnimalBreed, null=True)
     color = models.ManyToManyField(AnimalColor, null=True)
 
+    def incrementViews(self):
+        self.views += 1
+        self.save()
+
+    def incrementLikes(self):
+        self.likes += 1
+        self.save()
+
     class Meta:
         ordering = ['name']
 
