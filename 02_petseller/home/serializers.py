@@ -15,19 +15,7 @@ class AnimalColorSerializer(serializers.ModelSerializer):
     class Meta:
         model = AnimalColor
         fields = ['color']
-        
-class AnimalSerializer(serializers.ModelSerializer):
-    category = serializers.SerializerMethodField()
-    color = AnimalColorSerializer(many=True)
-    breed = AnimalBreedSerializer(many=True)
 
-    def get_category(self, obj):
-        return obj.category.category
-    
-    class Meta:
-        model = Animal
-        exclude = ['updated_at']
-        
 class AnimalLocationSerializer(serializers.ModelSerializer):
     class Meta:
         model = AnimalLocation
@@ -36,5 +24,19 @@ class AnimalLocationSerializer(serializers.ModelSerializer):
 class AnimalImagesSerializer(serializers.ModelSerializer):
     class Meta:
         model = AnimalImages
-        fields = '__all__'
+        fields = ['image']
+        
+class AnimalSerializer(serializers.ModelSerializer):
+    category = serializers.SerializerMethodField()
+    color = AnimalColorSerializer(many=True)
+    breed = AnimalBreedSerializer(many=True)
+    animal_images = AnimalImagesSerializer(many=True)
+
+    def get_category(self, obj):
+        return obj.category.category
+    
+    class Meta:
+        model = Animal
+        exclude = ['updated_at']
+        
         
