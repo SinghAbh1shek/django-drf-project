@@ -15,7 +15,6 @@ class Category(BaseModel):
 class Record(BaseModel):
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     type = models.CharField(max_length=10, choices=TYPE_CHOICES)
-    category = models.CharField(max_length=100)
     date = models.DateField()
     notes = models.TextField(blank=True, null=True)
     is_deleted = models.BooleanField(default=False)
