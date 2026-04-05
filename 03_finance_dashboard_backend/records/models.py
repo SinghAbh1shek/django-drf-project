@@ -5,6 +5,13 @@ from .choices import TYPE_CHOICES
 
 User = get_user_model()
 
+class RecordManager(models.Manager):
+
+    """This return queryset with is_deleted=False / soft delete"""
+
+    def get_queryset(self):
+        return super().get_queryset().filter(is_deleted=False)
+
 class Category(BaseModel):
     category = models.CharField(max_length=100)
     type = models.CharField(max_length=10, choices=TYPE_CHOICES)
@@ -20,6 +27,9 @@ class Record(BaseModel):
     is_deleted = models.BooleanField(default=False)
     category = models.ForeignKey(Category, on_delete=models.DO_NOTHING, related_name='category_record')
     created_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='user_record')
+
+    objects = RecordManager()   # overiding default modelmanager
+    with_deleted = models.Manager()   # To see all record including deleted records
 
     def __str__(self):
         return f'{self.type} - {self.created_by.username}'

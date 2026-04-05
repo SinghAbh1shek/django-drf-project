@@ -6,7 +6,7 @@ from rest_framework.permissions import IsAuthenticated
 
 
 class RecordViewSet(ModelViewSet):
-    queryset = Record.objects.filter(is_deleted=False)
+    queryset = Record.objects.all()
     serializer_class = RecordSerializer
     permission_classes = [IsAuthenticated, IsAdminOrAnalyst]
 
