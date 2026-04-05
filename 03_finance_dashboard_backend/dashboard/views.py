@@ -5,6 +5,8 @@ from django.db.models import Sum, Count, Q, F
 from django.db.models.functions import TruncMonth
 from records.models import Record
 from records.serializers import RecordSerializer
+from django.core.paginator import Paginator
+from utils.paginator import paginate
 
 
 class DashboardAPI(APIView):
@@ -26,7 +28,11 @@ class DashboardAPI(APIView):
         }
     
     def get_top_category(self, records):
-        return self.get_category_data(records).first()
+        return records.filter(type='expense').values(
+            category_name=F('category__category')
+        ).annotate(
+            total_spent=Sum('amount')
+        ).order_by('-total_spent').first()
     
     def get_monthly_trends(self, records):
         monthly = records.annotate(
@@ -45,22 +51,26 @@ class DashboardAPI(APIView):
             for m in monthly
         ]
 
-    def get_category_data(self, records):
-        return records.filter(type='expense').values(
+    def get_category_data(self, records, page):
+        data =  records.filter(type='expense').values(
             category_name=F('category__category')
         ).annotate(
             total_spent=Sum('amount'),
             total_transactions=Count('id')
         ).order_by('-total_spent')
+
+        paginator = Paginator(data, 10)
+        return paginate(data, paginator, page)
+
     
 
-    def get_per_user_summary(self, records):
+    def get_per_user_summary(self, records, page):
         users = records.values('created_by__username').annotate(
             total_income=Sum('amount', filter=Q(type='income')),
             total_expense=Sum('amount', filter=Q(type='expense'))
         )
 
-        return [
+        data =  [
             {
                 "username": user['created_by__username'],
                 "total_income": user['total_income'] or 0,
@@ -69,6 +79,9 @@ class DashboardAPI(APIView):
             }
             for user in users
         ]
+
+        paginator = Paginator(data, 10)
+        return paginate(data, paginator, page)
     
     def get_recent(self, records):
         recent = records.order_by('-created_at')[:5]
@@ -77,6 +90,8 @@ class DashboardAPI(APIView):
 
     
     def get(self, request):
+        per_user_page = int(request.GET.get('per_user_page', 1))
+        category_page = int(request.GET.get('category_page', 1))
         user = request.user
 
         records = Record.objects.select_related('category', 'created_by')
@@ -87,9 +102,9 @@ class DashboardAPI(APIView):
 
         return Response({
             "summary": self.get_summary(records),
-            "top_category": self.get_top_category(records),
+            # "top_category": self.get_top_category(records),
             "monthly_trends": self.get_monthly_trends(records),
-            "category_data": self.get_category_data(records),
-            "per_user": self.get_per_user_summary(records),
+            "category_data": self.get_category_data(records, category_page),
+            "per_user": self.get_per_user_summary(records, per_user_page),
             "recent": self.get_recent(records),
         })
