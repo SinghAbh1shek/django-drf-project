@@ -1,18 +1,30 @@
 from rest_framework.viewsets import ModelViewSet
 from .models import Record
 from .serializers import RecordSerializer
-from users.permissions import IsAdminOrAnalyst
+from users.permissions import IsAdminAnalystOrOwner
 from rest_framework.permissions import IsAuthenticated
 
 
 class RecordViewSet(ModelViewSet):
     queryset = Record.objects.all()
     serializer_class = RecordSerializer
-    permission_classes = [IsAuthenticated, IsAdminOrAnalyst]
+    permission_classes = [IsAuthenticated, IsAdminAnalystOrOwner]
+
+    def get_queryset(self):
+        user = self.request.user
+
+        if user.role == 'admin':
+            return Record.objects.all()
+
+        if user.role == 'analyst':
+            return Record.objects.all()
+
+        if user.role == 'user':
+            return Record.objects.filter(created_by=user)
+
+        return Record.objects.none()
 
     def perform_create(self, serializer):
-        print(self.request.user)
-        print(self.request.user.role)
         serializer.save(created_by=self.request.user)
 
     def perform_destroy(self, instance):

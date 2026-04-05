@@ -3,7 +3,7 @@ from django.contrib.auth.models import AbstractUser
 from .choices import ROLE_CHOICES
 
 class User(AbstractUser):
-    role = models.CharField(max_length=10, choices=ROLE_CHOICES, default='viewer')
+    role = models.CharField(max_length=10, choices=ROLE_CHOICES, default='user')
     is_active = models.BooleanField(default=True)
     
     def save(self, *args, **kwargs):
