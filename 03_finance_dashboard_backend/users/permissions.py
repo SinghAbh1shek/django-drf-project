@@ -28,3 +28,7 @@ class IsAdminAnalystOrOwner(BasePermission):
             return obj.created_by == request.user       # give access to only user's own data
 
         return False
+    
+class IsAdmin(BasePermission):
+    def has_permission(self, request, view):
+        return request.user.is_authenticated and request.user.role == 'admin'
