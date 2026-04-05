@@ -35,7 +35,7 @@ class RecordSerializer(serializers.ModelSerializer):
         return value
     
     def create(self, validated_data):
-        category_name = validated_data.pop('category')
+        category_name = validated_data.pop('category').strip().lower() # popped category name form the data and normalized case sensitivity
         type = validated_data['type']
 
         category, _ = Category.objects.get_or_create(category=category_name, type=type)
@@ -45,10 +45,12 @@ class RecordSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         category_name = validated_data.pop('category', None)
         if category_name:
+            category_name = category_name.strip().lower()
             type = validated_data.get('type', instance.type)
             category, _ = Category.objects.get_or_create(category=category_name, type=type)
             instance.category = category
 
+        # dynamically updating other data exept category
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
 
