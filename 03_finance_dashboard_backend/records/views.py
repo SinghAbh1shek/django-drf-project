@@ -3,12 +3,16 @@ from .models import Record
 from .serializers import RecordSerializer
 from users.permissions import IsAdminAnalystOrOwner
 from rest_framework.permissions import IsAuthenticated
+from django_filters.rest_framework import DjangoFilterBackend
+from .filter import RecordFilter
 
 
 class RecordViewSet(ModelViewSet):
     queryset = Record.objects.all()
     serializer_class = RecordSerializer
     permission_classes = [IsAuthenticated, IsAdminAnalystOrOwner]
+    filter_backends = (DjangoFilterBackend,)
+    filterset_class = RecordFilter
 
     def get_queryset(self):
         user = self.request.user

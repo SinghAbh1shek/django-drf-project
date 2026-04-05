@@ -7,6 +7,8 @@ from records.models import Record
 from records.serializers import RecordSerializer
 from django.core.paginator import Paginator
 from utils.paginator import paginate
+from django_filters.rest_framework import DjangoFilterBackend
+from records.filter import RecordFilter
 
 
 class DashboardAPI(APIView):
@@ -95,6 +97,10 @@ class DashboardAPI(APIView):
         user = request.user
 
         records = Record.objects.select_related('category', 'created_by')
+
+        filterset = RecordFilter(request.GET, queryset=records)
+        if filterset.is_valid():
+            records = filterset.qs
 
         # Role-based filtering
         if user.role == 'user':
