@@ -1,7 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
 from django.core.validators import RegexValidator
-from .choices import ROLE_CHOICES
 
 User = get_user_model()
 
@@ -37,16 +36,7 @@ class LoginSerializer(serializers.Serializer):
     username = serializers.CharField(max_length=100)
     password = serializers.CharField(max_length=100)
 
-
-class UpdateUserRoleSerializer(serializers.Serializer):
-    user_id = serializers.IntegerField()
-    role = serializers.ChoiceField(choices=ROLE_CHOICES)
-
-    def validate(self, data):
-        try:
-            user = User.objects.get(id=data['user_id'])
-        except User.DoesNotExist:
-            raise serializers.ValidationError('user not found')
-        data['user'] = user
-        return data
-        
+class ListUserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['id', 'username', 'first_name', 'last_name', 'email', 'role', 'is_active']

@@ -5,6 +5,7 @@ from users.permissions import IsAdminAnalystOrOwner
 from rest_framework.permissions import IsAuthenticated
 from django_filters.rest_framework import DjangoFilterBackend
 from .filter import RecordFilter
+from utils.paginator import StandardResultPagination
 
 
 class RecordViewSet(ModelViewSet):
@@ -13,6 +14,7 @@ class RecordViewSet(ModelViewSet):
     permission_classes = [IsAuthenticated, IsAdminAnalystOrOwner]
     filter_backends = (DjangoFilterBackend,)
     filterset_class = RecordFilter
+    pagination_class = StandardResultPagination
 
     def get_queryset(self):
         user = self.request.user

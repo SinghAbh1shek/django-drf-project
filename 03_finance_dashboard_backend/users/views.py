@@ -1,10 +1,15 @@
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from .serializers import RegisterSerializer, LoginSerializer, UpdateUserRoleSerializer
+from .serializers import RegisterSerializer, LoginSerializer, ListUserSerializer
 from rest_framework.authtoken.models import Token
 from django.contrib.auth import authenticate
 from .permissions import IsAdmin
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.viewsets import ModelViewSet
+from django.contrib.auth import get_user_model
+from utils.paginator import StandardResultPagination
+
+User = get_user_model()
 
 
 class RegisterAPI(APIView):
@@ -38,7 +43,7 @@ class LoginAPI(APIView):
             data = request.data
             serializer = LoginSerializer(data=data)
             if serializer.is_valid():
-                user = authenticate(username = serializer.data['username'], password = serializer.data['password'])
+                user = authenticate(username = serializer.validated_data['username'], password = serializer.validated_data['password'])
                 if user:
                     token, _ = Token.objects.get_or_create(user=user)
                     return Response({
@@ -67,31 +72,9 @@ class LoginAPI(APIView):
                 'data': {}
             }, status=500)
 
-class UpdateUserRoleAPI(APIView):
+
+class ListUserViewSet(ModelViewSet):
     permission_classes = [IsAuthenticated, IsAdmin]
-    def post(self, request):
-        print(request.user)
-        try:
-            serializer = UpdateUserRoleSerializer(data = request.data)
-            if serializer.is_valid():
-                user = serializer.validated_data['user']
-                new_role = serializer.validated_data['role']
-                user.role = new_role
-                user.save()
-                return Response({
-                    'status': True,
-                    'message': f'role updated to - {new_role}',
-                    'data': {}
-                }, status=200)
-            
-            return Response({
-                'status': False,
-                'message': 'role not updated',
-                'data': serializer.errors
-            }, status=400)
-        except Exception as e:
-            return Response({
-                'status': False,
-                'message': 'something went wrong',
-                'data': {}
-            }, status=500)
+    queryset = User.objects.all()
+    serializer_class = ListUserSerializer
+    pagination_class = StandardResultPagination
