@@ -95,23 +95,39 @@ class DashboardAPI(APIView):
 
     
     def get(self, request):
-        user = request.user
+        try:
+            user = request.user
+            search = request.GET.get('search')
 
-        records = Record.objects.select_related('category', 'created_by')
+            records = Record.objects.select_related('category', 'created_by')
 
-        filterset = RecordFilter(request.GET, queryset=records)
-        if filterset.is_valid():
-            records = filterset.qs
+            filterset = RecordFilter(request.GET, queryset=records)
+            if filterset.is_valid():
+                records = filterset.qs
 
-        # Role-based filtering
-        if user.role == 'user':
-            records = records.filter(created_by=user)
+            if search:
+                records = records.filter(
+                    Q(category__category__icontains=search) |
+                    Q(type__icontains=search) |
+                    Q(created_by__username__icontains=search)
+                )
 
-        return Response({
-            "summary": self.get_summary(records),
-            "top_category": self.get_top_category(records),
-            "monthly_trends": self.get_monthly_trends(records),
-            "category_data": self.get_category_data(request, records),
-            "per_user": self.get_per_user_summary(request, records),
-            "recent": self.get_recent(records),
-        })
+            # Role-based filtering
+            if user.role == 'user':
+                records = records.filter(created_by=user)
+
+            return Response({
+                "summary": self.get_summary(records),
+                "top_category": self.get_top_category(records),
+                "monthly_trends": self.get_monthly_trends(records),
+                "category_data": self.get_category_data(request, records),
+                "per_user": self.get_per_user_summary(request, records),
+                "recent": self.get_recent(records),
+            })
+        except Exception as e:
+            print(e)
+            return Response({
+                'status': False,
+                'message': 'something went wrong',
+                'data': {}
+            })

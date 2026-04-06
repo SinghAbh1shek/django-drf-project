@@ -6,15 +6,18 @@ from rest_framework.permissions import IsAuthenticated
 from django_filters.rest_framework import DjangoFilterBackend
 from .filter import RecordFilter
 from utils.paginator import StandardResultPagination
+from rest_framework.filters import SearchFilter
 
 
 class RecordViewSet(ModelViewSet):
     queryset = Record.objects.all()
     serializer_class = RecordSerializer
     permission_classes = [IsAuthenticated, IsAdminAnalystOrOwner]
-    filter_backends = (DjangoFilterBackend,)
+    filter_backends = (DjangoFilterBackend, SearchFilter)
     filterset_class = RecordFilter
+    search_fields = ['category__category', 'notes', 'created_by__username']
     pagination_class = StandardResultPagination
+    
 
     def get_queryset(self):
         user = self.request.user
