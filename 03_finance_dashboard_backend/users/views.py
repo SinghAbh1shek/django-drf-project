@@ -8,6 +8,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.viewsets import ModelViewSet
 from django.contrib.auth import get_user_model
 from utils.paginator import StandardResultPagination
+from django_filters.rest_framework import DjangoFilterBackend
 
 User = get_user_model()
 
@@ -78,3 +79,5 @@ class ListUserViewSet(ModelViewSet):
     queryset = User.objects.all()
     serializer_class = ListUserSerializer
     pagination_class = StandardResultPagination
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['role', 'is_active']
