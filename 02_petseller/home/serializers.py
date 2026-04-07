@@ -48,6 +48,30 @@ class AnimalSerializer(serializers.ModelSerializer):
             animal.color.add(color_obj)
 
         return animal
+
+    def  update(self, instance, data):
+        if 'breed' in data:
+            breed = data.pop('breed')
+            instance.breed.clear()
+            for b in breed:
+                breed_obj, _ = AnimalBreed.objects.get_or_create(breed=b['breed'])
+                instance.breed.add(breed_obj)
+
+
+        if 'color' in data:
+            color = data.pop('color')
+            instance.color.clear()
+            for c in color:
+                color_obj, _ = AnimalColor.objects.get_or_create(color=c['color'])
+                instance.color.add(color_obj)
+
+        instance.name=data.get('name', instance.name)
+        instance.description=data.get('description', instance.description)
+        instance.gender=data.get('gender', instance.description)
+
+        instance.save()
+        return instance
+
     class Meta:
         model = Animal
         exclude = ['updated_at']

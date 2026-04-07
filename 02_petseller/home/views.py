@@ -139,3 +139,45 @@ class AnimalCreateAPI(APIView):
                 'message': 'something went wrong',
                 'data': {}
             })
+        
+    def patch(self, request):
+        try:
+            data = request.data
+            
+            if data.get('id') is None:
+                return Response({
+                    'status': False,
+                    'message': 'id is required',
+                    'data': {}
+                })
+            
+            animal_obj = Animal.objects.filter(uuid=data['id'])
+            if not animal_obj.exists():
+                return Response({
+                    'status': False,
+                    'message': 'invalid id',
+                    'data': {}
+                })
+                
+
+            animal_obj = animal_obj[0]
+            serializer = AnimalSerializer(animal_obj, data=data, partial=True)
+            if serializer.is_valid():
+                serializer.save()
+                return Response({
+                    'status': True,
+                    'message': 'animal updated',
+                    'data': serializer.data
+                })
+            return Response({
+                'status': False,
+                'message': 'invalid input',
+                'data': serializer.errors
+            })
+        except Exception as e:
+            print(e)
+            return Response({
+                'status': False,
+                'message': 'something went wrong',
+                'data': {}
+            })
