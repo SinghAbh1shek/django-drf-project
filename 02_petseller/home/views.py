@@ -6,6 +6,7 @@ from django.db.models import Q
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate
 from rest_framework.authtoken.models import Token
+from rest_framework.permissions import IsAuthenticated
 
 class AnimalAPI(APIView):
     def get(self, request):
@@ -106,6 +107,33 @@ class LoginAPI(APIView):
             })
 
         except Exception as e:
+            return Response({
+                'status': False,
+                'message': 'something went wrong',
+                'data': {}
+            })
+
+class AnimalCreateAPI(APIView):
+    permission_classes = [IsAuthenticated]
+    def post(self, request):
+        try:
+            data = request.data
+            data['owner']=request.user.id
+            serializer = AnimalSerializer(data=data)
+            if serializer.is_valid():
+                serializer.save()
+                return Response({
+                    'status': True,
+                    'message': 'animal data created',
+                    'data': serializer.data
+                })
+            return Response({
+                'status': False,
+                'message': 'invalid input',
+                'data': serializer.errors
+            })
+        except Exception as e:
+            print(e)
             return Response({
                 'status': False,
                 'message': 'something went wrong',
