@@ -1,6 +1,8 @@
 from rest_framework import serializers
 from .models import (AnimalCategory, AnimalBreed, AnimalColor, Animal, AnimalLocation, AnimalImages)
 from django.contrib.auth.models import User
+
+
 class AnimalCategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = AnimalCategory
@@ -67,7 +69,7 @@ class AnimalSerializer(serializers.ModelSerializer):
 
         instance.name=data.get('name', instance.name)
         instance.description=data.get('description', instance.description)
-        instance.gender=data.get('gender', instance.description)
+        instance.gender=data.get('gender', instance.gender)
 
         instance.save()
         return instance

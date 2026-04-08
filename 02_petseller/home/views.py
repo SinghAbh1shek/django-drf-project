@@ -7,6 +7,8 @@ from django.contrib.auth.models import User
 from django.contrib.auth import authenticate
 from rest_framework.authtoken.models import Token
 from rest_framework.permissions import IsAuthenticated
+from .permissions import IsPetOwnerPermission
+
 
 class AnimalAPI(APIView):
     def get(self, request):
@@ -114,7 +116,29 @@ class LoginAPI(APIView):
             })
 
 class AnimalCreateAPI(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsPetOwnerPermission]
+
+    def get(self, request):
+        queryset = Animal.objects.filter(owner=request.user)
+
+        if request.GET.get('search'):
+            search = request.GET.get('search')
+            queryset = queryset.filter(
+                Q(name__icontains = search) |
+                Q(description__icontains = search) |
+                Q(gender__iexact = search) |
+                Q(breed__breed__icontains = search) |
+                Q(color__color__icontains = search)
+            )
+
+        serializer = AnimalSerializer(queryset, many=True)
+
+        return Response({
+            'status': True,
+            'message': 'record fetched',
+            'data': serializer.data
+        })
+
     def post(self, request):
         try:
             data = request.data
@@ -161,6 +185,7 @@ class AnimalCreateAPI(APIView):
                 
 
             animal_obj = animal_obj[0]
+            self.check_object_permissions(request, animal_obj)
             serializer = AnimalSerializer(animal_obj, data=data, partial=True)
             if serializer.is_valid():
                 serializer.save()
@@ -178,6 +203,6 @@ class AnimalCreateAPI(APIView):
             print(e)
             return Response({
                 'status': False,
-                'message': 'something went wrong',
+                'message': 'something went wrong or you dont have permission to perform this action',
                 'data': {}
             })
