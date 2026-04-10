@@ -1,9 +1,9 @@
-from rest_framework.views import APIView
+from rest_framework import viewsets
 from rest_framework.response import Response
+from .models import Blog
+from .serializers import BlogSerializer
 
-class TestAPI(APIView):
-    def get(self, request):
-        return Response({
-            'status': True,
-            'message': "server is running"
-        })
+
+class BlogViewSet(viewsets.ModelViewSet):
+    queryset = Blog.objects.all()
+    serializer_class = BlogSerializer
