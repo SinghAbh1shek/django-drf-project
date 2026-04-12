@@ -8,6 +8,9 @@ class Blog(BaseModel):
     description = models.TextField()
     is_paid = models.BooleanField(default=False)
 
+    def __str__(self):
+        return self.title
+
 class Subscription(BaseModel):
     title = models.CharField(max_length=100)
     validity = models.IntegerField(default=30)
