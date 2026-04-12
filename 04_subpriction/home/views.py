@@ -20,7 +20,7 @@ class BlogViewSet(viewsets.ModelViewSet):
             'message': 'blog fetched',
             'data': {
                 'count': self.queryset.count(),
-                'data': self.serializer_class(queryset, many=True).data
+                'data': BlogSerializer(queryset, many=True).data
             }
         })
     
